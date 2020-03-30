@@ -1,4 +1,4 @@
-# corona_tracking_NYT
+# New York Times COVID-19 Data Visualization
 
 ## Project Information
 This project provides Visualizations (using a Bokeh Server) of current New York Times Covid-19 data. 
