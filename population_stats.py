@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+import sys
 import urllib.request
 
 
@@ -47,6 +47,15 @@ def get_data(access_saved=True):
 
   return merged
 
+
 if __name__ == "__main__":
-  us_counties = get_data(False)
-  print(list(us_counties))
+  if len(sys.argv) == 2 and sys.argv[1] == "pull_data":
+    print("Downloading Data...")
+    us_counties = get_data(False)
+    print("Data Downloaded")
+    print("Data Columns:", list(us_counties))
+
+  else:
+    print("Using old Data")
+    us_counties = get_data(True)
+    print("Data Columns:", list(us_counties))
