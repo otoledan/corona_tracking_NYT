@@ -22,3 +22,8 @@ Data used in this project is not perfect since the names of counties did not alw
 ## Screenshots
 ![screenshot](visualization.jpg)
 
+## Disclaimer
+I have no affiliation with the New York Times or the United States Census Bureua. All data used in this project was publically available. I am not responsible for any inference, decision, or determination, made from using this data.
+
+If either sources would like that this project be taken down please contact me at my [email](mail:otoledan@ucsd.edu).
+
