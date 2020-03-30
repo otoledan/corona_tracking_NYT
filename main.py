@@ -35,14 +35,16 @@ def gen_figure_2():
 
 
 def gen_figure_3():
-  global p3, s4, s5
-  p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State", plot_height=350,
+  global p3, t0, t1, t2, t3
+  p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State as compared to "
+                                            + county_name + ", " + state_name, plot_height=350,
               plot_width=800)
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
-  s4 = p3.line('date', 'cases_per_state', source=source)
-  s5 = p3.line('date', 'deaths_per_state', source=source, color="red", )
-
+  t0 = p3.line('date', 'cases_per_state', source=source)
+  t1 = p3.line('date', 'deaths_per_state', source=source, color="red", )
+  t2 = p3.line('date', 'cases_per_state', source=source1, line_dash="dotted")
+  t3 = p3.line('date', 'deaths_per_state', source=source1, color="red", line_dash="dotted")
 
 def gen_legend_1():
   global legend1
@@ -69,8 +71,10 @@ def gen_legend_2():
 def gen_legend_3():
   global legend3
   legend3 = Legend(items=[
-    ("County Cases/State Cases", [s4]),
-    ("County Deaths/State Deaths", [s5]),
+    ("County Cases/State Cases", [t0]),
+    ("County Deaths/State Deaths", [t1]),
+    (county_name + " Cases/" + state_name + " Cases", [t2]),
+    (county_name + " Deaths/" + state_name + " Deaths", [t3]),
   ], location=(0, 0))
 
 
@@ -100,6 +104,10 @@ def when_changing_state(attr, old, new):
 
 def when_changing_county(attr, old, new):
   state_name = select_state.value
+
+  if state_name == "foo" or state_name == None:
+    state_name = "Alabama"
+
   county_name = select_county.value
 
   state = us_counties.groupby("state").get_group(state_name)
@@ -107,6 +115,14 @@ def when_changing_county(attr, old, new):
   county = res.get_group(county_name)
 
   source.data = county
+
+def get_county_dataset(state_name, county_name):
+  us_counties["date"] = pd.to_datetime(us_counties['date'])
+  state = us_counties.groupby("state").get_group(state_name)
+  res = state.groupby("county")
+  county = res.get_group(county_name)
+
+  return county
 
 ###############################################################
 
@@ -119,14 +135,8 @@ if len(sys.argv) == 3:
   county_name = sys.argv[2]
 
 us_counties = get_data()
-us_counties["date"] = pd.to_datetime(us_counties['date'])
-
-state = us_counties.groupby("state").get_group(state_name)
-res = state.groupby("county")
-county = res.get_group(county_name)
-
-source = ColumnDataSource(county)
-source1 = ColumnDataSource(county)
+source = ColumnDataSource(get_county_dataset("Alabama", "Autauga"))
+source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
 gen_figure_1()
 gen_figure_2()
