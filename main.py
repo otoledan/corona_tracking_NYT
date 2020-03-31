@@ -160,7 +160,11 @@ if len(sys.argv) == 3:
   state_name = sys.argv[1]
   county_name = sys.argv[2]
 
-us_counties = get_data()
+if not hasattr(bokeh.server, "get_data"):
+  bokeh.server.get_data = False
+  bokeh.server.data = get_data()
+
+us_counties = bokeh.server.data
 
 first_state = list(us_counties["state"].unique())[0]
 first_county = list(us_counties.loc[us_counties["state"] == first_state]['county'].unique())[0]
@@ -208,11 +212,6 @@ def update():
 
   select_state.options = state_list
   select_county.options = counties_in_states
-
-
-if not hasattr(bokeh.server, "get_data"):
-  bokeh.server.get_data = False
-  bokeh.server.data = None
 
 def blocking_task():
   while True:
