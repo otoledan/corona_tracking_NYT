@@ -7,11 +7,10 @@ Data is auto-loaded and live updated (no need to restart server) every 6 hours.
 
 ## Installing Dependencies
 
-This paprojects uses [Pandas](https://pandas.pydata.org/) and [Bokeh](https://bokeh.org/).
+This project works thanks to the wonderful open-source packages [Pandas](https://pandas.pydata.org/) and [Bokeh](https://bokeh.org/).
 
-To install Pandas follow these [instructions](https://pandas.pydata.org/docs/getting_started/install.html).
-
-To install Bokeh follow these [instructions](https://docs.bokeh.org/en/latest/docs/user_guide/quickstart.html#userguide-quickstart).
+To install `Pandas` follow these [instructions](https://pandas.pydata.org/docs/getting_started/install.html).
+To install `Bokeh` follow these [instructions](https://docs.bokeh.org/en/latest/docs/user_guide/quickstart.html#userguide-quickstart).
 
 ## Launching Project
 Bokeh Server can be run using `bokeh serve --show main.py`
