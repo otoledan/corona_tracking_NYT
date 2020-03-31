@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import sys
 import urllib.request
@@ -5,16 +7,17 @@ import urllib.request
 
 def get_data(access_saved=True):
   merged = None
-  if access_saved:
+  if access_saved and os.path.exists("full_data.csv"):
     merged = pd.read_csv("full_data.csv")
-
   else:
     urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
     urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
     census_data = pd.read_csv("2018_est_census_data.csv")
-    census_data["County"] = census_data["County"].str.replace(" County", "", case=False)
     census_data["State"] = census_data["State"].str.strip()
+    census_data["County"] = census_data["County"].str.replace(" County", "", case=False)
+    census_data["County"] = census_data["County"].str.replace(" Parish", "", case=False)
+
     census_states = census_data["State"].unique()
     us_counties = pd.read_csv("us-counties.csv")
     us_counties["date"] = pd.to_datetime(us_counties['date'])

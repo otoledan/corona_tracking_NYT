@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, Legend
 from bokeh.layouts import gridplot
@@ -5,6 +7,10 @@ from bokeh.models.widgets import Dropdown, Select
 from bokeh.plotting import curdoc
 from population_stats import *
 import sys
+from tornado import gen
+import time
+from functools import partial
+from threading import Thread
 
 line_width = 3
 click_policy = "mute"
@@ -85,10 +91,10 @@ def gen_legend_3():
 
 
 def set_default_state_county_dropdowns():
-  global select_state, select_county
+  global select_state, select_county, first_state, first_county
   state_list = list(us_counties["state"].unique())
   state_list.sort()
-  counties_in_states = list(us_counties.loc[us_counties["state"] == "Alabama"]['county'].unique())
+  counties_in_states = list(us_counties.loc[us_counties["state"] == state_list[0]]['county'].unique())
   counties_in_states.sort()
   select_state = Select(title="State:", value="foo", options=state_list)
   select_county = Select(title="County:", value="foo", options=counties_in_states)
@@ -141,7 +147,11 @@ if len(sys.argv) == 3:
   county_name = sys.argv[2]
 
 us_counties = get_data()
-source = ColumnDataSource(get_county_dataset("Alabama", "Autauga"))
+
+first_state = list(us_counties["state"].unique())[0]
+first_county = list(us_counties.loc[us_counties["state"] == first_state]['county'].unique())[0]
+
+source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
 gen_figure_1()
@@ -162,7 +172,49 @@ p3.add_layout(legend3, 'right')
 select_state.on_change('value', when_changing_state)
 select_county.on_change('value', when_changing_county)
 
-curdoc().title = "COVID-19 Charts"
-curdoc().add_root(select_state)
-curdoc().add_root(select_county)
-curdoc().add_root(p)
+doc = curdoc()
+
+doc.title = "COVID-19 Charts"
+doc.add_root(select_state)
+doc.add_root(select_county)
+doc.add_root(p)
+
+@gen.coroutine
+def update():
+    temp_source = get_county_dataset(first_state, first_county)
+    temp_source1 = get_county_dataset(state_name, county_name)
+
+    source.data = temp_source
+    source1.data = temp_source1
+
+    state_list = list(us_counties["state"].unique())
+    state_list.sort()
+    counties_in_states = list(us_counties.loc[us_counties["state"] == select_state.value]['county'].unique())
+    counties_in_states.sort()
+
+    select_state.options = state_list
+    select_county.options = counties_in_states
+
+
+def blocking_task():
+    while True:
+      # do some blocking computation
+      cur_time = datetime.now()
+
+      print("Current Time:", str(cur_time.hour) + ":" + str(cur_time.minute).zfill(2) + ":"
+            + str(cur_time.second).zfill(2))
+      if cur_time.hour % 6 == 0 and cur_time.minute == 00:
+        print("Downloading Data...")
+        global us_counties
+        us_counties = get_data(False)
+        print("Downloaded")
+
+        doc.add_next_tick_callback(partial(update))
+
+      else:
+        print("Data will be updated at:", str((int(cur_time.hour/6)*6+6)%24) + ":00:00")
+      time.sleep(60)
+
+
+thread = Thread(target=blocking_task)
+thread.start()
