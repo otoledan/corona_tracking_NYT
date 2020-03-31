@@ -17,9 +17,9 @@ line_width = 3
 click_policy = "mute"
 muted_alpha = 0.2
 
-time_hour = 0
-time_minute = 0
 time_every = 6
+time_hour = 0 % time_every
+time_minute = 0
 
 def gen_figure_1():
   global p1, r0, r1, r2, r3, r4, r5
@@ -199,7 +199,10 @@ doc.add_root(p)
 
 @gen.coroutine
 def update():
-  temp_source = get_county_dataset(first_state, first_county)
+  current_state = select_state.value
+  current_county = select_county.value
+
+  temp_source = get_county_dataset(current_state, current_county)
   temp_source1 = get_county_dataset(state_name, county_name)
 
   source.data = temp_source
