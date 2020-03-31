@@ -17,6 +17,9 @@ line_width = 3
 click_policy = "mute"
 muted_alpha = 0.2
 
+time_hour = 0
+time_minute = 0
+time_every = 6
 
 def gen_figure_1():
   global p1, r0, r1, r2, r3, r4, r5
@@ -211,15 +214,16 @@ if not hasattr(bokeh.server, "get_data"):
   bokeh.server.get_data = False
   bokeh.server.data = None
 
-
 def blocking_task():
   while True:
     # do some blocking computation
     cur_time = datetime.now()
 
+    '''
     print("Current Time:", str(cur_time.hour) + ":" + str(cur_time.minute).zfill(2) + ":"
           + str(cur_time.second).zfill(2))
-    if cur_time.hour % 6 == 0 and cur_time.minute == 0:
+    '''
+    if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute:
       if bokeh.server.get_data == False:
         bokeh.server.get_data = True
 
@@ -229,14 +233,17 @@ def blocking_task():
         us_counties = bokeh.server.data
         print("Downloaded")
 
-    if cur_time.hour % 6 == 0 and cur_time.minute == 5:
+    if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 5:
       bokeh.server.get_data = False
       print("Reset get_data Flag")
       us_counties = bokeh.server.data
       doc.add_next_tick_callback(partial(update))
 
+    '''
     else:
-      print("Data will be updated at:", str((int(cur_time.hour / 6) * 6 + 6) % 24) + ":05:00")
+      print("Data will be updated at:", str((int(cur_time.hour / time_every) * time_every + time_every) % 24)
+            + ":" + str(time_minute + 5).zfill(2) + ":00")
+    '''
     time.sleep(60)
 
 
