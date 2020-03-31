@@ -197,7 +197,7 @@ doc.add_root(select_state)
 doc.add_root(select_county)
 doc.add_root(p)
 
-
+@gen.coroutine
 def update():
   temp_source = get_county_dataset(first_state, first_county)
   temp_source1 = get_county_dataset(state_name, county_name)
