@@ -6,6 +6,9 @@ from bokeh.plotting import curdoc
 from population_stats import *
 import sys
 
+line_width = 3
+click_policy = "mute"
+muted_alpha = 0.2
 
 def gen_figure_1():
   global p1, r0, r1, r2, r3, r4, r5
@@ -13,12 +16,12 @@ def gen_figure_1():
               plot_height=350, plot_width=800)
   p1.xaxis.axis_label = 'Time'
   p1.yaxis.axis_label = 'People'
-  r0 = p1.line('date', 'cases', source=source)
-  r1 = p1.line('date', 'deaths', source=source, color="red")
-  r2 = p1.line('date', 'cases', source=source1, line_dash="dotted")
-  r3 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dotted")
-  r4 = p1.line('date', 'cases_state', source=source, line_dash="dashed")
-  r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dashed")
+  r0 = p1.line('date', 'cases', source=source, line_width=line_width, muted_alpha=muted_alpha)
+  r1 = p1.line('date', 'deaths', source=source, color="red", line_width=line_width, muted_alpha=muted_alpha)
+  r2 = p1.line('date', 'cases', source=source1, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
+  r3 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
+  r4 = p1.line('date', 'cases_state', source=source, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
 
 
 def gen_figure_2():
@@ -28,10 +31,10 @@ def gen_figure_2():
               plot_width=800)
   p2.xaxis.axis_label = 'Time'
   p2.yaxis.axis_label = 'Percent People'
-  s0 = p2.line('date', 'cases_per_capita', source=source)
-  s1 = p2.line('date', 'deaths_per_capita', source=source, color="red")
-  s2 = p2.line('date', 'cases_per_capita', source=source1, line_dash="dotted")
-  s3 = p2.line('date', 'deaths_per_capita', source=source1, color="red", line_dash="dotted")
+  s0 = p2.line('date', 'cases_per_capita', source=source, line_width=line_width, muted_alpha=muted_alpha)
+  s1 = p2.line('date', 'deaths_per_capita', source=source, color="red", line_width=line_width, muted_alpha=muted_alpha)
+  s2 = p2.line('date', 'cases_per_capita', source=source1, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  s3 = p2.line('date', 'deaths_per_capita', source=source1, color="red", line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
 
 
 def gen_figure_3():
@@ -41,10 +44,10 @@ def gen_figure_3():
               plot_width=800)
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
-  t0 = p3.line('date', 'cases_per_state', source=source)
-  t1 = p3.line('date', 'deaths_per_state', source=source, color="red", )
-  t2 = p3.line('date', 'cases_per_state', source=source1, line_dash="dotted")
-  t3 = p3.line('date', 'deaths_per_state', source=source1, color="red", line_dash="dotted")
+  t0 = p3.line('date', 'cases_per_state', source=source, line_width=line_width, muted_alpha=muted_alpha)
+  t1 = p3.line('date', 'deaths_per_state', source=source, color="red", line_width=line_width, muted_alpha=muted_alpha)
+  t2 = p3.line('date', 'cases_per_state', source=source1, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  t3 = p3.line('date', 'deaths_per_state', source=source1, color="red", line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
 
 def gen_legend_1():
   global legend1
@@ -56,6 +59,7 @@ def gen_legend_1():
     ("Cases in State", [r4]),
     ("Deaths in State", [r5]),
   ], location=(0, 0))
+  legend1.click_policy = click_policy
 
 
 def gen_legend_2():
@@ -66,6 +70,7 @@ def gen_legend_2():
     ("Cases per Capita in " + county_name + ", " + state_name, [s2]),
     ("Deaths per Capita in " + county_name + ", " + state_name, [s3]),
   ], location=(0, 0))
+  legend2.click_policy = click_policy
 
 
 def gen_legend_3():
@@ -76,6 +81,7 @@ def gen_legend_3():
     (county_name + " Cases/" + state_name + " Cases", [t2]),
     (county_name + " Deaths/" + state_name + " Deaths", [t3]),
   ], location=(0, 0))
+  legend3.click_policy = click_policy
 
 
 def set_default_state_county_dropdowns():
