@@ -24,10 +24,10 @@ def gen_figure_1():
   p1.yaxis.axis_label = 'People'
   r0 = p1.line('date', 'cases', source=source, line_width=line_width, muted_alpha=muted_alpha)
   r1 = p1.line('date', 'deaths', source=source, color="red", line_width=line_width, muted_alpha=muted_alpha)
-  r2 = p1.line('date', 'cases', source=source1, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
-  r3 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
-  r4 = p1.line('date', 'cases_state', source=source, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
-  r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  r2 = p1.line('date', 'cases', source=source1, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  r3 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
+  r4 = p1.line('date', 'cases_state', source=source, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
+  r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
 
 
 def gen_figure_2():
@@ -58,12 +58,12 @@ def gen_figure_3():
 def gen_legend_1():
   global legend1
   legend1 = Legend(items=[
+    ("Cases in State", [r4]),
+    ("Deaths in State", [r5]),
     ("Cases", [r0]),
     ("Deaths", [r1]),
     ("Cases in " + county_name + ", " + state_name, [r2]),
     ("Deaths in " + county_name + ", " + state_name, [r3]),
-    ("Cases in State", [r4]),
-    ("Deaths in State", [r5]),
   ], location=(0, 0))
   legend1.click_policy = click_policy
 
