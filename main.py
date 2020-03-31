@@ -48,7 +48,7 @@ def gen_figure_2():
 
 def gen_figure_3():
   p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State as compared to "
-                                            + county_name + ", " + state_name, plot_height=350,
+                                            + county_name + ", " + state_name, plot_height=350 + 120,
               plot_width=800)
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
@@ -63,13 +63,13 @@ def gen_figure_3():
 
 def gen_legend_1():
   legend1 = Legend(items=[
-    ("Cases in State", [r4]),
-    ("Deaths in State", [r5]),
-    ("Cases", [r0]),
-    ("Deaths", [r1]),
-    ("Cases in " + county_name + ", " + state_name, [r2]),
-    ("Deaths in " + county_name + ", " + state_name, [r3]),
-  ], location=(0, 0))
+    ("Cases in " + first_state, [q0]),
+    ("Deaths in " + first_state, [q1]),
+    ("Cases in " + first_county + ", " + first_state, [q2]),
+    ("Deaths in " + first_county + ", " + first_state, [q3]),
+    ("Cases in " + county_name + ", " + state_name, [q4]),
+    ("Deaths in " + county_name + ", " + state_name, [q5]),
+  ], location="top_left")
   legend1.click_policy = click_policy
 
   return legend1
@@ -77,11 +77,11 @@ def gen_legend_1():
 
 def gen_legend_2():
   legend2 = Legend(items=[
-    ("Cases per Capita", [s0]),
-    ("Deaths per Capita", [s1]),
+    ("Cases per Capita in " + first_county + ", " + first_state, [s0]),
+    ("Deaths per Capita in " + first_county + ", " + first_state, [s1]),
     ("Cases per Capita in " + county_name + ", " + state_name, [s2]),
     ("Deaths per Capita in " + county_name + ", " + state_name, [s3]),
-  ], location=(0, 0))
+  ], location="top_left")
   legend2.click_policy = click_policy
 
   return  legend2
@@ -89,14 +89,18 @@ def gen_legend_2():
 
 def gen_legend_3():
   legend3 = Legend(items=[
-    ("County Cases/State Cases", [t0]),
-    ("County Deaths/State Deaths", [t1]),
-    (county_name + " Cases/" + state_name + " Cases", [t2]),
-    (county_name + " Deaths/" + state_name + " Deaths", [t3]),
-  ], location=(0, 0))
+    (first_county + " Cases/" + first_state + " Cases", [t0]),
+    (first_county + " Deaths/" + first_state + " Deaths", [t1]),
+  ], location=(0, 20), orientation="horizontal")
   legend3.click_policy = click_policy
 
-  return legend3
+  legend4 = Legend(items=[
+    (county_name + " Cases/" + state_name + " Cases", [t2]),
+    (county_name + " Deaths/" + state_name + " Deaths", [t3]),
+  ], location=(0, 40), orientation="horizontal")
+  legend4.click_policy = click_policy
+
+  return legend3, legend4
 
 def gen_select_state_county():
   state_list = list(us_counties["state"].unique())
@@ -131,6 +135,17 @@ def when_changing_state(attr, old, new):
 def when_changing_county(attr, old, new):
   state_name = select_state.value
   county_name = select_county.value
+
+  legend1.items[0] = LegendItem(label="Cases in " + state_name, renderers=[q0])
+  legend1.items[1] = LegendItem(label="Deaths in " + state_name, renderers=[q1])
+  legend1.items[2] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q2])
+  legend1.items[3] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q3])
+
+  legend2.items[0] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s0])
+  legend2.items[1] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s1])
+
+  legend3.items[0] = LegendItem(label=county_name + " Cases/" + state_name + " Cases", renderers=[t0])
+  legend3.items[1] = LegendItem(label=county_name + " Deaths/" + state_name + " Deaths", renderers=[t1])
 
   state = us_counties.groupby("state").get_group(state_name)
   res = state.groupby("county")
@@ -225,24 +240,30 @@ if not hasattr(bokeh.server, "get_data"):
 
 us_counties = bokeh.server.data
 
-first_state = list(us_counties["state"].unique())[0]
-first_county = list(us_counties.loc[us_counties["state"] == first_state]['county'].unique())[0]
+first_state = list(us_counties["state"].unique())
+first_state.sort()
+first_state = first_state[0]
+
+first_county = list(us_counties.loc[us_counties["state"] == first_state]['county'].unique())
+first_county.sort()
+first_county = first_county[0]
 
 source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
-p1, r0, r1, r2, r3, r4, r5 = gen_figure_1()
+p1, q2, q3, q4, q5, q0, q1 = gen_figure_1()
 p2, s0, s1, s2, s3 = gen_figure_2()
 p3, t0, t1, t2, t3 = gen_figure_3()
 p = gridplot([[p1], [p2], [p3]])
 
 legend1 = gen_legend_1()
 legend2 = gen_legend_2()
-legend3 = gen_legend_3()
+legend3, legend4 = gen_legend_3()
 
-p1.add_layout(legend1, 'right')
-p2.add_layout(legend2, 'right')
-p3.add_layout(legend3, 'right')
+p1.add_layout(legend1)
+p2.add_layout(legend2)
+p3.add_layout(legend3, "below")
+p3.add_layout(legend4, "below")
 
 select_state, select_county = gen_select_state_county()
 select_state.on_change('value', when_changing_state)
