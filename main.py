@@ -1,8 +1,6 @@
 from datetime import datetime
-
-from bokeh.core.property.instance import Instance
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, Legend, CustomJS, LegendItem
+from bokeh.models import ColumnDataSource, Legend, CustomJS, LegendItem, Paragraph
 from bokeh.layouts import gridplot
 from bokeh.models.widgets import Dropdown, Select
 from bokeh.plotting import curdoc
@@ -16,8 +14,7 @@ import bokeh.server
 
 
 def gen_figure_1():
-  p1 = figure(x_axis_type="datetime", title="Cases and Deaths as compared to " + county_name + ", " + state_name,
-              plot_height=350, plot_width=800)
+  p1 = figure(x_axis_type="datetime", title="Cases and Deaths ", plot_height=300, plot_width=800)
   p1.xaxis.axis_label = 'Time'
   p1.yaxis.axis_label = 'People'
   r0 = p1.line('date', 'cases', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -33,9 +30,7 @@ def gen_figure_1():
 
 
 def gen_figure_2():
-  p2 = figure(x_axis_type="datetime",
-              title="Cases and Deaths per Capita as compared to " + county_name + ", " + state_name, plot_height=350,
-              plot_width=800)
+  p2 = figure(x_axis_type="datetime", title="Cases and Deaths per Capita", plot_height=300, plot_width=800)
   p2.xaxis.axis_label = 'Time'
   p2.yaxis.axis_label = 'Percent People'
   s0 = p2.line('date', 'cases_per_capita', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -49,9 +44,8 @@ def gen_figure_2():
 
 
 def gen_figure_3():
-  p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State as compared to "
-                                            + county_name + ", " + state_name, plot_height=350 + 120,
-              plot_width=800)
+  p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State",
+              plot_height=300 + 120, plot_width=800)
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
   t0 = p3.line('date', 'cases_per_state', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -106,16 +100,16 @@ def gen_legend_3():
   return legend3, legend4
 
 
-def gen_select_state_county():
+def gen_select_state_county(state_name, county_name):
   state_list = list(us_counties["state"].unique())
   state_list.sort()
-  counties_in_states = list(us_counties.loc[us_counties["state"] == state_list[0]]['county'].unique())
+  counties_in_states = list(us_counties.loc[us_counties["state"] == state_name]['county'].unique())
   counties_in_states.sort()
   select_state = Select(title="State:", value="foo", options=state_list)
   select_county = Select(title="County:", value="foo", options=counties_in_states)
 
-  select_state.value = state_list[0]
-  select_county.value = counties_in_states[0]
+  select_state.value = state_name
+  select_county.value = county_name
 
   return select_state, select_county
 
@@ -155,6 +149,40 @@ def when_changing_county(attr, old, new):
   county = res.get_group(county_name)
 
   source.data = county
+
+def when_changing_state_2(attr, old, new):
+  state = select_state_2.value
+  counties_in_states = list(us_counties.loc[us_counties["state"] == state]['county'].unique())
+  counties_in_states.sort()
+  select_county_2.options = counties_in_states
+
+  state_name = state
+
+  state = us_counties.groupby("state").get_group(state_name)
+  res = state.groupby("county")
+  county = res.get_group(counties_in_states[0])
+  select_county_2.value = counties_in_states[0]
+  source1.data = county
+
+
+def when_changing_county_2(attr, old, new):
+  state_name = select_state_2.value
+  county_name = select_county_2.value
+
+  legend1.items[4] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q4])
+  legend1.items[5] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q5])
+
+  legend2.items[2] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s2])
+  legend2.items[3] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s3])
+
+  legend4.items[0] = LegendItem(label=county_name + " Cases/" + state_name + " Cases", renderers=[t2])
+  legend4.items[1] = LegendItem(label=county_name + " Deaths/" + state_name + " Deaths", renderers=[t3])
+
+  state = us_counties.groupby("state").get_group(state_name)
+  res = state.groupby("county")
+  county = res.get_group(county_name)
+
+  source1.data = county
 
 
 def get_county_dataset(state_name, county_name):
@@ -270,14 +298,33 @@ p2.add_layout(legend2)
 p3.add_layout(legend3, "below")
 p3.add_layout(legend4, "below")
 
-select_state, select_county = gen_select_state_county()
+title = Paragraph(text='''COVID-19 Cases and Deaths in US Counties''', width=800, style={"font-size": "32px"})
+subtitle = Paragraph(text=
+                     '''The following charts represent the data on a county level of COVID-19 cases and can be 
+                        compared to another county in the U.S.
+                     ''', width=800, style={"font-size": "24px"})
+text_col_select = Paragraph(text='''Select a State and County''', width=300)
+text_col_select_2 = Paragraph(text='''Select a Comparison State and County''', width=300)
+
+select_state, select_county = gen_select_state_county(first_state, first_county)
 select_state.on_change('value', when_changing_state)
 select_county.on_change('value', when_changing_county)
 
+select_state_2, select_county_2 = gen_select_state_county(state_name, county_name)
+select_state_2.on_change('value', when_changing_state_2)
+select_county_2.on_change('value', when_changing_county_2)
+
+selection_grid = bokeh.layouts.layout([
+    [title],
+    [subtitle],
+    [text_col_select, text_col_select_2],
+    [select_state, select_state_2],
+    [select_county, select_county_2]
+])
+
 doc = curdoc()
 doc.title = "COVID-19 Charts"
-doc.add_root(select_state)
-doc.add_root(select_county)
+doc.add_root(selection_grid)
 doc.add_root(p)
 
 thread = Thread(target=blocking_task)
