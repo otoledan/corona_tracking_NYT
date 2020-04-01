@@ -80,7 +80,7 @@ majority of these cases are a result of the New York Times dataset listing the c
 
 ## Disclaimer
 I have no affiliation with the New York Times or the United States Census Bureau. All data used in this project was 
-publicly available. I am not responsible for any inference, decision, or determination, made from using this data.
+publicly available. I am not responsible for any inference, decision, or determination, made using this data.
 
 If either sources would like that this project be taken down please contact me at my [email](mailto:otoledan@ucsd.edu).
 
