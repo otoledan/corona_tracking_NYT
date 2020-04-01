@@ -21,8 +21,8 @@ Data can be updated manually by running `python population_stats pull_data`
 
 ## Using Project
 
-Two drop down menus allow you to select the state and county of Covid-19 cases. This data will be compared to the state 
-and county with which you launched the program.
+Four drop down menus allow you to select the state and county (and comparison state and county) of Covid-19 cases. All 
+plots data and legends will be automatically updated to match your selection. 
 
 Lines can be muted (reduced to 20% opacity) and unmuted by clicking the line in the legend to the right of the graph.
 
@@ -30,7 +30,6 @@ Panning the graphs can be done by clicking and dragging the graph within its bor
 
 Zooming in on parts of the graph can either be done using square selection or using the scroll wheel on your mouse. The 
 option to zoom must be selected in the Bokeh toolbar in the upper right corner of the page.
-
 
 ## Data Sources and Accuracy
 Data used and calculated in this project is not perfect since the names of counties did not always match between the 
