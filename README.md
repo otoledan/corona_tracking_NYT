@@ -6,18 +6,49 @@ This project provides Visualizations (using a Bokeh Server) of current New York 
 Data is auto-loaded and live updated (no need to restart server) every 6 hours.
 
 ## Installing Dependencies
+This project was written using Python3.
 
 This project works thanks to the wonderful open-source packages [Pandas](https://pandas.pydata.org/) and [Bokeh](https://bokeh.org/).
+
+### Using a Virtual Environment (Optional)
+
+If you would like to install this project without effecting the other packages on your system you can use a virtual environment.
+
+Run the below which will create and then launch your virtual environment.
+```
+pip3 install virtualenv
+python3 -m venv <myenvname> 
+```
+
+Then install the dependencies as specified below.
+
+### Quick Install Dependencies
+
+Run `pip3 install -r requirements.txt` in the main directory to install dependent packages.
+
+### Manual Install Dependencies
+Most of the packages in `requirements.txt` are already installed. The main two packages needed are `Pandas` and `Bokeh`.
 
 To install `Pandas` follow these [instructions](https://pandas.pydata.org/docs/getting_started/install.html).
 To install `Bokeh` follow these [instructions](https://docs.bokeh.org/en/latest/docs/user_guide/quickstart.html#userguide-quickstart).
 
 ## Launching Project
-Bokeh Server can be run using `bokeh serve --show main.py`
 
-If you would like to change the default comparison county run  `bokeh serve --show main.py --args "state" "county"`
+### If using a Virtual environment
+Launch your virtual environment first, then follow the below instructions.
+```
+python3 -m venv <myenvname> 
+```
 
-Data can be updated manually by running `python population_stats pull_data`
+### All Us Cases
+This project uses a Bokeh Server to run the site with visualizations locally.
+
+To launch the Bokeh Server run `bokeh serve --show main.py`.
+
+If you would like to change the default comparison county run  `bokeh serve --show main.py --args "state" "county"`.
+
+Data can be updated manually by running `python population_stats pull_data`. This is not needed since data will be 
+pulled by the Bokeh server every 6 hours.
 
 ## Using Project
 
