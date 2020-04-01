@@ -14,6 +14,7 @@ from functools import partial
 from threading import Thread
 import bokeh.server
 
+
 def gen_figure_1():
   p1 = figure(x_axis_type="datetime", title="Cases and Deaths as compared to " + county_name + ", " + state_name,
               plot_height=350, plot_width=800)
@@ -29,6 +30,7 @@ def gen_figure_1():
                muted_alpha=muted_alpha)
 
   return p1, r0, r1, r2, r3, r4, r5
+
 
 def gen_figure_2():
   p2 = figure(x_axis_type="datetime",
@@ -61,6 +63,7 @@ def gen_figure_3():
 
   return p3, t0, t1, t2, t3
 
+
 def gen_legend_1():
   legend1 = Legend(items=[
     ("Cases in " + first_state, [q0]),
@@ -84,7 +87,7 @@ def gen_legend_2():
   ], location="top_left")
   legend2.click_policy = click_policy
 
-  return  legend2
+  return legend2
 
 
 def gen_legend_3():
@@ -102,6 +105,7 @@ def gen_legend_3():
 
   return legend3, legend4
 
+
 def gen_select_state_county():
   state_list = list(us_counties["state"].unique())
   state_list.sort()
@@ -114,7 +118,6 @@ def gen_select_state_county():
   select_county.value = counties_in_states[0]
 
   return select_state, select_county
-
 
 
 def when_changing_state(attr, old, new):
@@ -162,6 +165,7 @@ def get_county_dataset(state_name, county_name):
 
   return county
 
+
 @gen.coroutine
 def update():
   current_state = select_state.value
@@ -180,6 +184,7 @@ def update():
 
   select_state.options = state_list
   select_county.options = counties_in_states
+
 
 def blocking_task():
   while True:
@@ -213,18 +218,18 @@ def blocking_task():
     '''
     time.sleep(60)
 
+
 ###############################################################
 
-#Line Settings
+# Line Settings
 line_width = 3
 click_policy = "mute"
 muted_alpha = 0.2
 
-#Data Update Settings
+# Data Update Settings
 time_every = 6
 time_hour = 0 % time_every
 time_minute = 0
-
 
 # Default Comparison County
 state_name = "California"

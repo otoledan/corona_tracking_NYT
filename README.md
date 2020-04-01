@@ -21,17 +21,23 @@ Data can be updated manually by running `python population_stats pull_data`
 
 ## Using Project
 
-Two drop down menus allow you to select the state and county of Covid-19 cases. This data will be compared to the state and county with which you launched the program.
+Two drop down menus allow you to select the state and county of Covid-19 cases. This data will be compared to the state 
+and county with which you launched the program.
 
 Lines can be muted (reduced to 20% opacity) and unmuted by clicking the line in the legend to the right of the graph.
 
 Panning the graphs can be done by clicking and dragging the graph within its borders.
 
-Zomming in on parts of the graph can either be done using square selection or using the scroll wheel on your mouse. The option to zoom must be selected in the Bokeh toolbar in the upper right corner of the page.
+Zooming in on parts of the graph can either be done using square selection or using the scroll wheel on your mouse. The 
+option to zoom must be selected in the Bokeh toolbar in the upper right corner of the page.
 
 
 ## Data Sources and Accuracy
-Data used in this project is not perfect since the names of counties did not always match between the the New York Times and Census datasets.
+Data used and calculated in this project is not perfect since the names of counties did not always match between the 
+New York Times and Census datasets.
+
+Currently there are 305/21,799 rows of data (as of 3/31/20) where the county does not match the census. The vast 
+majority of these cases are a result of the New York Times dataset listing the county as "Unknown".
 
 ### New York Times COVID-19 Dataset
 [NYT](https://github.com/nytimes/covid-19-data) 
@@ -43,7 +49,8 @@ Data used in this project is not perfect since the names of counties did not alw
 ![screenshot](visualization.jpg)
 
 ## Disclaimer
-I have no affiliation with the New York Times or the United States Census Bureua. All data used in this project was publically available. I am not responsible for any inference, decision, or determination, made from using this data.
+I have no affiliation with the New York Times or the United States Census Bureau. All data used in this project was 
+publicly available. I am not responsible for any inference, decision, or determination, made from using this data.
 
 If either sources would like that this project be taken down please contact me at my [email](mailto:otoledan@ucsd.edu).
 
