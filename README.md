@@ -55,6 +55,9 @@ pulled by the Bokeh server every 6 hours.
 Four drop down menus allow you to select the state and county (and comparison state and county) of Covid-19 cases. All 
 plots data and legends will be automatically updated to match your selection. 
 
+Some plots can also be viewed on Logarithmic scale (instead of the usual linear scale), this makes understanding the
+trends of the plots a little easier.
+
 Lines can be muted (reduced to 20% opacity) and unmuted by clicking the line in the legend to the right of the graph.
 
 Panning the graphs can be done by clicking and dragging the graph within its borders.
