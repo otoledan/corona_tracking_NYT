@@ -1,11 +1,8 @@
 from datetime import datetime
-from tkinter.ttk import Scale
-
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, Legend, CustomJS, LegendItem, Paragraph, RadioGroup, RadioButtonGroup, \
-  LinearScale, LogScale
+from bokeh.models import ColumnDataSource, Legend, LegendItem, Paragraph, Panel, Tabs
 from bokeh.layouts import gridplot
-from bokeh.models.widgets import Dropdown, Select
+from bokeh.models.widgets import Select
 from bokeh.plotting import curdoc
 from population_stats import *
 import sys
@@ -139,13 +136,11 @@ def when_changing_county(attr, old, new):
   state_name = select_state.value
   county_name = select_county.value
 
-  legend1.items[0] = LegendItem(label="Cases in " + state_name, renderers=[q0])
-  legend1.items[1] = LegendItem(label="Deaths in " + state_name, renderers=[q1])
-  legend1.items[2] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q2])
-  legend1.items[3] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q3])
+  set_legend1_1(legend1, county_name, state_name, q0, q1, q2, q3)
+  set_legend1_1(legend1_log, county_name, state_name, q0_log, q1_log, q2_log, q3_log)
 
-  legend2.items[0] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s0])
-  legend2.items[1] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s1])
+  set_legend2_1(legend2, county_name, state_name, s0, s1)
+  set_legend2_1(legend2_log, county_name, state_name, s0_log, s1_log)
 
   legend3.items[0] = LegendItem(label=county_name + " Cases/" + state_name + " Cases", renderers=[t0])
   legend3.items[1] = LegendItem(label=county_name + " Deaths/" + state_name + " Deaths", renderers=[t1])
@@ -155,6 +150,19 @@ def when_changing_county(attr, old, new):
   county = res.get_group(county_name)
 
   source.data = county
+
+
+def set_legend2_1(legend, county_name, state_name, s0, s1):
+  legend.items[0] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s0])
+  legend.items[1] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s1])
+
+
+def set_legend1_1(legend, county_name, state_name, q0, q1, q2, q3):
+  legend.items[0] = LegendItem(label="Cases in " + state_name, renderers=[q0])
+  legend.items[1] = LegendItem(label="Deaths in " + state_name, renderers=[q1])
+  legend.items[2] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q2])
+  legend.items[3] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q3])
+
 
 def when_changing_state_2(attr, old, new):
   state = select_state_2.value
@@ -175,11 +183,11 @@ def when_changing_county_2(attr, old, new):
   state_name = select_state_2.value
   county_name = select_county_2.value
 
-  legend1.items[4] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q4])
-  legend1.items[5] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q5])
+  set_legend1_2(legend1, county_name, state_name, q4, q5)
+  set_legend1_2(legend1_log, county_name, state_name, q4_log, q5_log)
 
-  legend2.items[2] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s2])
-  legend2.items[3] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s3])
+  set_legend2_2(legend2, county_name, state_name, s2, s3)
+  set_legend2_2(legend2_log, county_name, state_name, s2_log, s3_log)
 
   legend4.items[0] = LegendItem(label=county_name + " Cases/" + state_name + " Cases", renderers=[t2])
   legend4.items[1] = LegendItem(label=county_name + " Deaths/" + state_name + " Deaths", renderers=[t3])
@@ -189,6 +197,16 @@ def when_changing_county_2(attr, old, new):
   county = res.get_group(county_name)
 
   source1.data = county
+
+
+def set_legend2_2(legend, county_name, state_name, s2, s3):
+  legend.items[2] = LegendItem(label="Cases per Capita in " + county_name + ", " + state_name, renderers=[s2])
+  legend.items[3] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s3])
+
+
+def set_legend1_2(legend, county_name, state_name, q4, q5):
+  legend.items[4] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q4])
+  legend.items[5] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q5])
 
 
 def get_county_dataset(state_name, county_name):
@@ -294,27 +312,46 @@ source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
 p1, q2, q3, q4, q5, q0, q1, title_p1 = gen_figure_1()
+p1_log, q2_log, q3_log, q4_log, q5_log, q0_log, q1_log, title_p1_log = gen_figure_1("log")
+tab1_lin = Panel(child=p1, title="Linear")
+tab1_log = Panel(child=p1_log, title="Logarithmic")
+tabs_1 = Tabs(tabs=[tab1_lin, tab1_log])
+
 p2, s0, s1, s2, s3, title_p2 = gen_figure_2()
+p2_log, s0_log, s1_log, s2_log, s3_log, title_p2_log = gen_figure_2("log")
+tab2_lin = Panel(child=p2, title="Linear")
+tab2_log = Panel(child=p2_log, title="Logarithmic")
+tabs_2 = Tabs(tabs=[tab2_lin, tab2_log])
+
 p3, t0, t1, t2, t3, title_p3 = gen_figure_3()
 
 p = gridplot([[title_p1],
-              [p1],
+              [tabs_1],
               [title_p2],
-              [p2],
+              [tabs_2],
               [title_p3],
               [p3]])
 
 legend1 = gen_legend_1(q0, q1, q2, q3, q4, q5)
 legend2 = gen_legend_2(s0, s1, s2, s3)
+
+legend1_log = gen_legend_1(q0_log, q1_log, q2_log, q3_log, q4_log, q5_log)
+legend2_log = gen_legend_2(s0_log, s1_log, s2_log, s3_log)
+
 legend3, legend4 = gen_legend_3(t0, t1, t2, t3)
 
 p1.add_layout(legend1)
+p1_log.add_layout(legend1_log)
+
 p2.add_layout(legend2)
+p2_log.add_layout(legend2_log)
+
 p3.add_layout(legend3, "below")
 p3.add_layout(legend4, "below")
 
 title = gen_html_paragraph("COVID-19 Cases and Deaths in US Counties", 800, 32)
-subtitle = gen_html_paragraph("The following charts represent the data on a county level of COVID-19 cases and can be compared to another county in the U.S.", 800, 24)
+subtitle = gen_html_paragraph("The following charts represent the data on a county level of COVID-19 cases and can be "
+                              "compared to another county in the U.S.", 800, 24)
 text_col_select = gen_html_paragraph('Select a State and County', width=300)
 text_col_select_2 = gen_html_paragraph('Select a Comparison State and County', width=300)
 
