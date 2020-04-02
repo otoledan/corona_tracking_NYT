@@ -1,6 +1,9 @@
 from datetime import datetime
+from tkinter.ttk import Scale
+
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, Legend, CustomJS, LegendItem, Paragraph
+from bokeh.models import ColumnDataSource, Legend, CustomJS, LegendItem, Paragraph, RadioGroup, RadioButtonGroup, \
+  LinearScale, LogScale
 from bokeh.layouts import gridplot
 from bokeh.models.widgets import Dropdown, Select
 from bokeh.plotting import curdoc
@@ -13,8 +16,9 @@ from threading import Thread
 import bokeh.server
 
 
-def gen_figure_1():
-  p1 = figure(x_axis_type="datetime", title="Cases and Deaths ", plot_height=300, plot_width=800)
+def gen_figure_1(y_axis_type="linear"):
+  title = gen_html_paragraph(text="Cases and Deaths", weight="bold")
+  p1 = figure(x_axis_type="datetime", plot_height=300, plot_width=800, y_axis_type=y_axis_type)
   p1.xaxis.axis_label = 'Time'
   p1.yaxis.axis_label = 'People'
   r0 = p1.line('date', 'cases', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -26,11 +30,12 @@ def gen_figure_1():
   r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dotted", line_width=line_width,
                muted_alpha=muted_alpha)
 
-  return p1, r0, r1, r2, r3, r4, r5
+  return p1, r0, r1, r2, r3, r4, r5, title
 
 
-def gen_figure_2():
-  p2 = figure(x_axis_type="datetime", title="Cases and Deaths per Capita", plot_height=300, plot_width=800)
+def gen_figure_2(y_axis_type="linear"):
+  title = gen_html_paragraph(text="Cases and Deaths per Capita", weight="bold")
+  p2 = figure(x_axis_type="datetime", plot_height=300, plot_width=800, y_axis_type=y_axis_type)
   p2.xaxis.axis_label = 'Time'
   p2.yaxis.axis_label = 'Percent People'
   s0 = p2.line('date', 'cases_per_capita', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -40,11 +45,12 @@ def gen_figure_2():
   s3 = p2.line('date', 'deaths_per_capita', source=source1, color="red", line_dash="dashed", line_width=line_width,
                muted_alpha=muted_alpha)
 
-  return p2, s0, s1, s2, s3
+  return p2, s0, s1, s2, s3, title
 
 
 def gen_figure_3():
-  p3 = figure(x_axis_type="datetime", title="Cases and Deaths over Total Cases and Deaths in State",
+  title = gen_html_paragraph(text="Cases and Deaths over Total Cases and Deaths in State", weight="bold")
+  p3 = figure(x_axis_type="datetime",
               plot_height=300 + 120, plot_width=800)
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
@@ -55,10 +61,10 @@ def gen_figure_3():
   t3 = p3.line('date', 'deaths_per_state', source=source1, color="red", line_dash="dashed", line_width=line_width,
                muted_alpha=muted_alpha)
 
-  return p3, t0, t1, t2, t3
+  return p3, t0, t1, t2, t3, title
 
 
-def gen_legend_1():
+def gen_legend_1(q0, q1, q2, q3, q4, q5):
   legend1 = Legend(items=[
     ("Cases in " + first_state, [q0]),
     ("Deaths in " + first_state, [q1]),
@@ -72,7 +78,7 @@ def gen_legend_1():
   return legend1
 
 
-def gen_legend_2():
+def gen_legend_2(s0, s1, s2, s3):
   legend2 = Legend(items=[
     ("Cases per Capita in " + first_county + ", " + first_state, [s0]),
     ("Deaths per Capita in " + first_county + ", " + first_state, [s1]),
@@ -84,7 +90,7 @@ def gen_legend_2():
   return legend2
 
 
-def gen_legend_3():
+def gen_legend_3(t0, t1, t2, t3):
   legend3 = Legend(items=[
     (first_county + " Cases/" + first_state + " Cases", [t0]),
     (first_county + " Deaths/" + first_state + " Deaths", [t1]),
@@ -247,6 +253,9 @@ def blocking_task():
     time.sleep(60)
 
 
+def gen_html_paragraph(text, width=800, font_size=13.333, weight="normal"):
+  return Paragraph(text=text, width=width, style={"font-size": str(font_size) + "px", "font-weight": weight})
+
 ###############################################################
 
 # Line Settings
@@ -284,27 +293,30 @@ first_county = first_county[0]
 source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
-p1, q2, q3, q4, q5, q0, q1 = gen_figure_1()
-p2, s0, s1, s2, s3 = gen_figure_2()
-p3, t0, t1, t2, t3 = gen_figure_3()
-p = gridplot([[p1], [p2], [p3]])
+p1, q2, q3, q4, q5, q0, q1, title_p1 = gen_figure_1()
+p2, s0, s1, s2, s3, title_p2 = gen_figure_2()
+p3, t0, t1, t2, t3, title_p3 = gen_figure_3()
 
-legend1 = gen_legend_1()
-legend2 = gen_legend_2()
-legend3, legend4 = gen_legend_3()
+p = gridplot([[title_p1],
+              [p1],
+              [title_p2],
+              [p2],
+              [title_p3],
+              [p3]])
+
+legend1 = gen_legend_1(q0, q1, q2, q3, q4, q5)
+legend2 = gen_legend_2(s0, s1, s2, s3)
+legend3, legend4 = gen_legend_3(t0, t1, t2, t3)
 
 p1.add_layout(legend1)
 p2.add_layout(legend2)
 p3.add_layout(legend3, "below")
 p3.add_layout(legend4, "below")
 
-title = Paragraph(text='''COVID-19 Cases and Deaths in US Counties''', width=800, style={"font-size": "32px"})
-subtitle = Paragraph(text=
-                     '''The following charts represent the data on a county level of COVID-19 cases and can be 
-                        compared to another county in the U.S.
-                     ''', width=800, style={"font-size": "24px"})
-text_col_select = Paragraph(text='''Select a State and County''', width=300)
-text_col_select_2 = Paragraph(text='''Select a Comparison State and County''', width=300)
+title = gen_html_paragraph("COVID-19 Cases and Deaths in US Counties", 800, 32)
+subtitle = gen_html_paragraph("The following charts represent the data on a county level of COVID-19 cases and can be compared to another county in the U.S.", 800, 24)
+text_col_select = gen_html_paragraph('Select a State and County', width=300)
+text_col_select_2 = gen_html_paragraph('Select a Comparison State and County', width=300)
 
 select_state, select_county = gen_select_state_county(first_state, first_county)
 select_state.on_change('value', when_changing_state)
