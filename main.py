@@ -26,6 +26,8 @@ def gen_figure_1(y_axis_type="linear"):
   r4 = p1.line('date', 'cases_state', source=source, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
   r5 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dotted", line_width=line_width,
                muted_alpha=muted_alpha)
+  r0_trend_log = p1.line("date", "cases_trend_log", source=source, line_width=line_width-1, color="orange")
+  r1_trend_log = p1.line("date", "deaths_trend_log", source=source, line_width=line_width - 1, color="green")
 
   return p1, r0, r1, r2, r3, r4, r5, title
 

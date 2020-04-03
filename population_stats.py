@@ -3,15 +3,17 @@ import os
 import pandas as pd
 import sys
 import urllib.request
+import numpy as np
 
+np.warnings.filterwarnings('ignore')
 
 def get_data(access_saved=True):
   merged = None
   if access_saved and os.path.exists("full_data.csv"):
     merged = pd.read_csv("full_data.csv")
   else:
-    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
-    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
+    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
+    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
     census_data = pd.read_csv("2018_est_census_data.csv")
     census_data["State"] = census_data["State"].str.strip()
@@ -26,6 +28,12 @@ def get_data(access_saved=True):
     cens_st = census_data.groupby('State')
     cor_st = us_counties.groupby('state')
     us_counties["population"] = float('inf')
+    #us_counties["cases_trend_lin"] = 0
+    us_counties["cases_trend_log"] = 0
+    #us_counties["deaths_trend_lin"] = 0
+    us_counties["deaths_trend_log"] = 0
+
+
     for state in intersection:
       state_data_cens = cens_st.get_group(state)
       state_data_cor = cor_st.get_group(state)
@@ -35,6 +43,17 @@ def get_data(access_saved=True):
       for county_name in counties_exist_both_sets:
         pop = state_data_cens.loc[state_data_cens["County"] == county_name]["Total"].values[0]
         us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "population"] = pop
+
+        county = us_counties[(us_counties["state"] == state) & (us_counties["county"] == county_name)]
+        trend_county_cases_log = make_trend_line(county["date"], county["cases"], 5)
+        trend_county_deaths_log = make_trend_line(county["date"], county["deaths"], 5)
+
+        #us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "cases_trend_lin"] = trend_county_cases_lin
+        us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "cases_trend_log"] = trend_county_cases_log
+        #us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "deaths_trend_lin"] = trend_county_deaths_lin
+        us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "deaths_trend_log"] = trend_county_deaths_log
+
+
     us_counties['cases_per_capita'] = us_counties.apply(lambda row: row.cases / row.population, axis=1)
     us_counties['deaths_per_capita'] = us_counties.apply(lambda row: row.deaths / row.population, axis=1)
 
@@ -49,6 +68,36 @@ def get_data(access_saved=True):
     merged.to_csv("full_data.csv")
 
   return merged
+
+
+def make_trend_line(x, y, deg):
+  act_len = len(x)
+  y = np.array(y)
+  length = len(np.argwhere(y > 0))
+  x = range(1, length+1)
+  prepend = np.array([0]*(act_len - length))
+
+  #y_lin = np.array(y)
+
+
+  #trend = np.polyfit(x, y_lin, 1)
+  #trend = np.poly1d(trend)
+  #trend_lin = trend(x)
+
+  if len(prepend) != act_len:
+    y_log = y[-1 * (act_len - len(prepend)):]
+    y_log = np.log(y_log)
+
+    trend = np.polyfit(x, y_log, deg)
+    trend = np.poly1d(trend)
+    trend_log = np.exp(trend(x))
+
+    trend_log = np.append(prepend, trend_log)
+
+  else:
+    trend_log = prepend
+
+  return trend_log
 
 
 if __name__ == "__main__":
