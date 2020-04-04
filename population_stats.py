@@ -19,6 +19,8 @@ def get_data(access_saved=True):
     urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
     urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
+    #time1 = time.clock()
+
     census_data = pd.read_csv("2018_est_census_data.csv")
     census_data["State"] = census_data["State"].str.strip()
     census_data["County"] = census_data["County"].str.replace(" County", "", case=False)
@@ -27,17 +29,25 @@ def get_data(access_saved=True):
     census_states = census_data["State"].unique()
     us_counties = pd.read_csv("us-counties.csv")
     us_counties["date"] = pd.to_datetime(us_counties['date'])
+
     corona_states = us_counties['state'].unique()
     intersection = list(set(census_states).intersection(set(corona_states)))
+
     cens_st = census_data.groupby('State')
     cor_st = us_counties.groupby('state')
+
     us_counties["population"] = float('inf')
-    #us_counties["cases_trend_lin"] = 0
     us_counties["cases_trend_log"] = 0
-    #us_counties["deaths_trend_lin"] = 0
     us_counties["deaths_trend_log"] = 0
 
-    q = Queue(maxsize=0)
+    population_index = 6
+    cases_trend_log_index = 7
+    deaths_trend_log_index = 8
+
+    us_numpy = us_counties.to_numpy()
+    all_cases = np.array(us_numpy[:, 4], float)
+    all_deaths = np.array(us_numpy[:, 5], float)
+
 
     for state in intersection:
       state_data_cens = cens_st.get_group(state)
@@ -46,19 +56,22 @@ def get_data(access_saved=True):
       counties_exist_both_sets = list(set(count_data_cor.groups).intersection(set(state_data_cens["County"])))
 
       for county_name in counties_exist_both_sets:
-        pop = state_data_cens.loc[state_data_cens["County"] == county_name]["Total"].values[0]
-        us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "population"] = pop
+        state_indexes = np.argwhere(us_numpy[:, 2] == state)
+        county_indexes = np.argwhere(us_numpy[:, 1] == county_name)
+        intersection_state_county_indexes = np.intersect1d(county_indexes, state_indexes, assume_unique=False)
 
-        county = us_counties[(us_counties["state"] == state) & (us_counties["county"] == county_name)]
-        cases = np.array(county["cases"])
-        deaths = np.array(county["deaths"])
+        pop = state_data_cens.loc[state_data_cens["County"] == county_name]["Total"].values[0]
+        us_counties.iloc[intersection_state_county_indexes, population_index] = pop
+        #us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "population"] = pop
+
+        cases = all_cases[intersection_state_county_indexes]
+        deaths = all_deaths[intersection_state_county_indexes]
 
         trend_county_cases_log = make_trend_line(cases, 7)
         trend_county_deaths_log = make_trend_line(deaths, 7)
 
-        us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "cases_trend_log"] = trend_county_cases_log
-        us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "deaths_trend_log"] = trend_county_deaths_log
-
+        us_counties.iloc[intersection_state_county_indexes, cases_trend_log_index] = trend_county_cases_log
+        us_counties.iloc[intersection_state_county_indexes, deaths_trend_log_index] = trend_county_deaths_log
 
     us_counties['cases_per_capita'] = us_counties.apply(lambda row: row.cases / row.population, axis=1)
     us_counties['deaths_per_capita'] = us_counties.apply(lambda row: row.deaths / row.population, axis=1)
@@ -72,6 +85,10 @@ def get_data(access_saved=True):
     merged['deaths_per_state'] = merged.apply(lambda row: 0 if row.deaths_state == 0 else row.deaths / row.deaths_state, axis=1)
 
     merged.to_csv("full_data.csv")
+
+    #time11 = time.clock()
+
+    #print("time11 - time1:", time11-time1)
 
   return merged
 

@@ -316,7 +316,7 @@ source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 
 p1, q0, q1, q2, q3, q4, q5, q0_trend, q1_trend, title_p1 = gen_figure_1()
-p1_log, q2_log, q3_log, q4_log, q5_log, q0_log, q1_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")
+p1_log, q0_log, q1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")
 tab1_lin = Panel(child=p1, title="Linear")
 tab1_log = Panel(child=p1_log, title="Logarithmic")
 tabs_1 = Tabs(tabs=[tab1_lin, tab1_log])
