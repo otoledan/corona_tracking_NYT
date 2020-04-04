@@ -16,8 +16,8 @@ def get_data(access_saved=True):
   if access_saved and os.path.exists("full_data.csv"):
     merged = pd.read_csv("full_data.csv")
   else:
-    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
-    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
     census_data = pd.read_csv("2018_est_census_data.csv")
     census_data["State"] = census_data["State"].str.strip()
