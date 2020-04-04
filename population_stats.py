@@ -1,9 +1,13 @@
 import os
+import time
 
 import pandas as pd
 import sys
 import urllib.request
 import numpy as np
+
+from queue import Queue
+from threading import Thread
 
 np.warnings.filterwarnings('ignore')
 
@@ -33,6 +37,7 @@ def get_data(access_saved=True):
     #us_counties["deaths_trend_lin"] = 0
     us_counties["deaths_trend_log"] = 0
 
+    q = Queue(maxsize=0)
 
     for state in intersection:
       state_data_cens = cens_st.get_group(state)
@@ -45,12 +50,13 @@ def get_data(access_saved=True):
         us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "population"] = pop
 
         county = us_counties[(us_counties["state"] == state) & (us_counties["county"] == county_name)]
-        trend_county_cases_log = make_trend_line(county["date"], county["cases"], 5)
-        trend_county_deaths_log = make_trend_line(county["date"], county["deaths"], 5)
+        cases = np.array(county["cases"])
+        deaths = np.array(county["deaths"])
 
-        #us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "cases_trend_lin"] = trend_county_cases_lin
+        trend_county_cases_log = make_trend_line(cases, 7)
+        trend_county_deaths_log = make_trend_line(deaths, 7)
+
         us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "cases_trend_log"] = trend_county_cases_log
-        #us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "deaths_trend_lin"] = trend_county_deaths_lin
         us_counties.loc[(us_counties["state"] == state) & (us_counties["county"] == county_name), "deaths_trend_log"] = trend_county_deaths_log
 
 
@@ -69,20 +75,12 @@ def get_data(access_saved=True):
 
   return merged
 
+def make_trend_line(y, deg):
+  act_len = len(y)
 
-def make_trend_line(x, y, deg):
-  act_len = len(x)
-  y = np.array(y)
   length = len(np.argwhere(y > 0))
   x = range(1, length+1)
   prepend = np.array([0]*(act_len - length))
-
-  #y_lin = np.array(y)
-
-
-  #trend = np.polyfit(x, y_lin, 1)
-  #trend = np.poly1d(trend)
-  #trend_lin = trend(x)
 
   if len(prepend) != act_len:
     y_log = y[-1 * (act_len - len(prepend)):]
