@@ -26,8 +26,8 @@ def gen_figure_1(y_axis_type="linear"):
   #r0 = p1.line('date', 'cases_state', source=source2, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
   #r1 = p1.line('date', 'deaths_state', source=source2, color="red", line_dash="dotted", line_width=line_width,
   #             muted_alpha=muted_alpha)
-  r0_trend_log = p1.line("date", "cases_trend_log", source=source, line_width=line_width - 2, color="orange", muted_alpha = 0)
-  r1_trend_log = p1.line("date", "deaths_trend_log", source=source, line_width=line_width - 2, color="green", muted_alpha = 0)
+  r0_trend_log = p1.line("date", "cases_trend_log", source=source, line_width=line_width - 2, color="orange", muted_alpha=0)
+  r1_trend_log = p1.line("date", "deaths_trend_log", source=source, line_width=line_width - 2, color="green", muted_alpha=0)
 
   return p1, r2, r3, r4, r5, r0_trend_log, r1_trend_log, title
 
@@ -43,8 +43,10 @@ def gen_figure_2(y_axis_type="linear"):
                muted_alpha=muted_alpha)
   s3 = p2.line('date', 'deaths_per_capita', source=source1, color="red", line_dash="dashed", line_width=line_width,
                muted_alpha=muted_alpha)
+  s0_trend_log = p2.line('date', 'cases_per_capita_trend_log', source=source, line_width=line_width - 2, color="orange", muted_alpha=0)
+  s1_trend_log = p2.line('date', 'deaths_per_capita_trend_log', source=source, line_width=line_width - 2, color="green", muted_alpha=0)
 
-  return p2, s0, s1, s2, s3, title
+  return p2, s0, s1, s2, s3, s0_trend_log, s1_trend_log, title
 
 
 def gen_figure_3():
@@ -77,12 +79,14 @@ def gen_legend_1(q2, q3, q4, q5, q0_trend, q1_trend):
   return legend1
 
 
-def gen_legend_2(s0, s1, s2, s3):
+def gen_legend_2(s0, s1, s2, s3, s0_trend, s1_trend):
   legend2 = Legend(items=[
     ("Cases per Capita in " + first_county + ", " + first_state, [s0]),
     ("Deaths per Capita in " + first_county + ", " + first_state, [s1]),
     ("Cases per Capita in " + county_name + ", " + state_name, [s2]),
     ("Deaths per Capita in " + county_name + ", " + state_name, [s3]),
+    ("Cases per Capita Trendline", [s0_trend]),
+    ("Deaths per Capita Trendline", [s1_trend])
   ], location="top_left")
   legend2.click_policy = click_policy
 
@@ -335,8 +339,8 @@ tab1_lin = Panel(child=p1, title="Linear")
 tab1_log = Panel(child=p1_log, title="Logarithmic")
 tabs_1 = Tabs(tabs=[tab1_lin, tab1_log])
 
-p2, s0, s1, s2, s3, title_p2 = gen_figure_2()
-p2_log, s0_log, s1_log, s2_log, s3_log, title_p2_log = gen_figure_2("log")
+p2, s0, s1, s2, s3, s0_trend, s1_trend, title_p2 = gen_figure_2()
+p2_log, s0_log, s1_log, s2_log, s3_log, s0_trend_log, s1_trend_log, title_p2_log = gen_figure_2("log")
 tab2_lin = Panel(child=p2, title="Linear")
 tab2_log = Panel(child=p2_log, title="Logarithmic")
 tabs_2 = Tabs(tabs=[tab2_lin, tab2_log])
@@ -351,10 +355,10 @@ p = gridplot([[title_p1],
               [p3]])
 
 legend1 = gen_legend_1(q2, q3, q4, q5, q0_trend, q1_trend)
-legend2 = gen_legend_2(s0, s1, s2, s3)
+legend2 = gen_legend_2(s0, s1, s2, s3, s0_trend, s1_trend)
 
 legend1_log = gen_legend_1(q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log)
-legend2_log = gen_legend_2(s0_log, s1_log, s2_log, s3_log)
+legend2_log = gen_legend_2(s0_log, s1_log, s2_log, s3_log, s0_trend_log, s1_trend_log)
 
 legend3, legend4 = gen_legend_3(t0, t1, t2, t3)
 

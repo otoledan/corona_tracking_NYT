@@ -16,10 +16,10 @@ def get_data(access_saved=True):
   if access_saved and os.path.exists("full_data.csv"):
     merged = pd.read_csv("full_data.csv")
   else:
-    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
-    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
+    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
+    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
-    #time1 = time.clock()
+    time1 = time.clock()
 
     census_data = pd.read_csv("2018_est_census_data.csv")
     census_data["State"] = census_data["State"].str.strip()
@@ -54,6 +54,9 @@ def get_data(access_saved=True):
     all_cases = np.array(us_numpy[:, 4], float)
     all_deaths = np.array(us_numpy[:, 5], float)
 
+    deg = 5
+
+    time2 = time.clock()
 
     for state in intersection:
       state_data_cens = cens_st.get_group(state)
@@ -73,14 +76,50 @@ def get_data(access_saved=True):
         cases = all_cases[intersection_state_county_indexes]
         deaths = all_deaths[intersection_state_county_indexes]
 
-        trend_county_cases_log = make_trend_line(cases, 7)
-        trend_county_deaths_log = make_trend_line(deaths, 7)
+        trend_county_cases_log = make_trend_line(cases, deg)
+        trend_county_deaths_log = make_trend_line(deaths, deg)
 
         us_counties.iloc[intersection_state_county_indexes, cases_trend_log_index] = trend_county_cases_log
         us_counties.iloc[intersection_state_county_indexes, deaths_trend_log_index] = trend_county_deaths_log
 
+    time3 = time.clock()
+
     us_counties['cases_per_capita'] = us_counties.apply(lambda row: row.cases / row.population, axis=1)
     us_counties['deaths_per_capita'] = us_counties.apply(lambda row: row.deaths / row.population, axis=1)
+
+    us_counties["cases_per_capita_trend_log"] = 0
+    us_counties["deaths_per_capita_trend_log"] = 0
+
+    cases_per_capita_trend_log_index = 11
+    deaths_per_capita_trend_log_index = 12
+
+    us_numpy = us_counties.to_numpy()
+    all_cases_per_capita = np.array(us_numpy[:, 9], float)
+    all_deaths_per_capita = np.array(us_numpy[:, 10], float)
+
+    time4 = time.clock()
+
+    for state in intersection:
+      state_data_cens = cens_st.get_group(state)
+      state_data_cor = cor_st.get_group(state)
+      count_data_cor = state_data_cor.groupby("county")
+      counties_exist_both_sets = list(set(count_data_cor.groups).intersection(set(state_data_cens["County"])))
+
+      for county_name in counties_exist_both_sets:
+        state_indexes = np.argwhere(us_numpy[:, 2] == state)
+        county_indexes = np.argwhere(us_numpy[:, 1] == county_name)
+        intersection_state_county_indexes = np.intersect1d(county_indexes, state_indexes, assume_unique=False)
+
+        cases_per_capita = all_cases_per_capita[intersection_state_county_indexes]
+        deaths_per_capita = all_deaths_per_capita[intersection_state_county_indexes]
+
+        trend_county_cases_per_capita_log = make_trend_line(cases_per_capita, deg)
+        trend_county_deaths_per_capita_log = make_trend_line(deaths_per_capita, deg)
+
+        us_counties.iloc[intersection_state_county_indexes, cases_per_capita_trend_log_index] = trend_county_cases_per_capita_log
+        us_counties.iloc[intersection_state_county_indexes, deaths_per_capita_trend_log_index] = trend_county_deaths_per_capita_log
+
+    time5 = time.clock()
 
     merged = pd.merge(left=us_counties, right=us_states, how='inner', on=["date", "state"], suffixes=("", "_state"))
 
@@ -89,9 +128,13 @@ def get_data(access_saved=True):
 
     merged.to_csv("full_data.csv")
 
-    #time11 = time.clock()
+    time6 = time.clock()
 
-    #print("time11 - time1:", time11-time1)
+    '''
+    l = [time1, time2, time3, time4, time5, time6]
+    for i in range(len(l) - 1):
+      print("time" + str(i + 2) + " - time" + str(i+1) + ":", l[i+1] - l[i])
+    '''
 
   return merged
 
