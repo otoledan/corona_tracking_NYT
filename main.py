@@ -23,8 +23,8 @@ def gen_figure_1(y_axis_type="linear"):
   r4 = p1.line('date', 'cases', source=source1, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
   r5 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dashed", line_width=line_width,
                muted_alpha=muted_alpha)
-  r0 = p1.line('date', 'cases_state', source=source, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
-  r1 = p1.line('date', 'deaths_state', source=source, color="red", line_dash="dotted", line_width=line_width,
+  r0 = p1.line('date', 'cases_state', source=source2, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
+  r1 = p1.line('date', 'deaths_state', source=source2, color="red", line_dash="dotted", line_width=line_width,
                muted_alpha=muted_alpha)
   r0_trend_log = p1.line("date", "cases_trend_log", source=source, line_width=line_width - 2, color="orange", muted_alpha = 0)
   r1_trend_log = p1.line("date", "deaths_trend_log", source=source, line_width=line_width - 2, color="green", muted_alpha = 0)
@@ -154,6 +154,7 @@ def when_changing_county(attr, old, new):
   county = res.get_group(county_name)
 
   source.data = county
+  source2.data = res.get_group(" All Counties")
 
 
 def set_legend2_1(legend, county_name, state_name, s0, s1):
@@ -229,9 +230,11 @@ def update():
 
   temp_source = get_county_dataset(current_state, current_county)
   temp_source1 = get_county_dataset(state_name, county_name)
+  temp_source2 = get_county_dataset(current_state, " All Counties")
 
   source.data = temp_source
   source1.data = temp_source1
+  source2.data = temp_source2
 
   state_list = list(us_counties["state"].unique())
   state_list.sort()
@@ -287,8 +290,8 @@ muted_alpha = 0.2
 
 # Data Update Settings
 time_every = 6
-time_hour = 0 % time_every
-time_minute = 0
+time_hour = 5 % time_every
+time_minute = 4
 
 # Default Comparison County
 state_name = "California"
@@ -314,6 +317,7 @@ first_county = first_county[0]
 
 source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
+source2 = ColumnDataSource(get_county_dataset(first_state, " All Counties"))
 
 p1, q0, q1, q2, q3, q4, q5, q0_trend, q1_trend, title_p1 = gen_figure_1()
 p1_log, q0_log, q1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")

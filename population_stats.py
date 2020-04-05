@@ -30,6 +30,12 @@ def get_data(access_saved=True):
     us_counties = pd.read_csv("us-counties.csv")
     us_counties["date"] = pd.to_datetime(us_counties['date'])
 
+    us_states = pd.read_csv("us-states.csv")
+    us_states["date"] = pd.to_datetime(us_states['date'])
+
+    us_states["county"] = " All Counties"
+    us_counties = us_counties.append(us_states, ignore_index=True)
+
     corona_states = us_counties['state'].unique()
     intersection = list(set(census_states).intersection(set(corona_states)))
 
@@ -75,9 +81,6 @@ def get_data(access_saved=True):
 
     us_counties['cases_per_capita'] = us_counties.apply(lambda row: row.cases / row.population, axis=1)
     us_counties['deaths_per_capita'] = us_counties.apply(lambda row: row.deaths / row.population, axis=1)
-
-    us_states = pd.read_csv("us-states.csv")
-    us_states["date"] = pd.to_datetime(us_states['date'])
 
     merged = pd.merge(left=us_counties, right=us_states, how='inner', on=["date", "state"], suffixes=("", "_state"))
 
