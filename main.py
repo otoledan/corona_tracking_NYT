@@ -300,8 +300,8 @@ muted_alpha = 0.2
 
 # Data Update Settings
 time_every = 6
-time_hour = 5 % time_every
-time_minute = 4
+time_hour = 0 % time_every
+time_minute = 0
 
 # Default Comparison County
 state_name = "California"
