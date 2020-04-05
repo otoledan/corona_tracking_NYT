@@ -23,13 +23,13 @@ def gen_figure_1(y_axis_type="linear"):
   r4 = p1.line('date', 'cases', source=source1, line_dash="dashed", line_width=line_width, muted_alpha=muted_alpha)
   r5 = p1.line('date', 'deaths', source=source1, color="red", line_dash="dashed", line_width=line_width,
                muted_alpha=muted_alpha)
-  r0 = p1.line('date', 'cases_state', source=source2, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
-  r1 = p1.line('date', 'deaths_state', source=source2, color="red", line_dash="dotted", line_width=line_width,
-               muted_alpha=muted_alpha)
+  #r0 = p1.line('date', 'cases_state', source=source2, line_dash="dotted", line_width=line_width, muted_alpha=muted_alpha)
+  #r1 = p1.line('date', 'deaths_state', source=source2, color="red", line_dash="dotted", line_width=line_width,
+  #             muted_alpha=muted_alpha)
   r0_trend_log = p1.line("date", "cases_trend_log", source=source, line_width=line_width - 2, color="orange", muted_alpha = 0)
   r1_trend_log = p1.line("date", "deaths_trend_log", source=source, line_width=line_width - 2, color="green", muted_alpha = 0)
 
-  return p1, r0, r1, r2, r3, r4, r5, r0_trend_log, r1_trend_log, title
+  return p1, r2, r3, r4, r5, r0_trend_log, r1_trend_log, title
 
 
 def gen_figure_2(y_axis_type="linear"):
@@ -63,10 +63,8 @@ def gen_figure_3():
   return p3, t0, t1, t2, t3, title
 
 
-def gen_legend_1(q0, q1, q2, q3, q4, q5, q0_trend, q1_trend):
+def gen_legend_1(q2, q3, q4, q5, q0_trend, q1_trend):
   legend1 = Legend(items=[
-    ("Cases in " + first_state, [q0]),
-    ("Deaths in " + first_state, [q1]),
     ("Cases in " + first_county + ", " + first_state, [q2]),
     ("Deaths in " + first_county + ", " + first_state, [q3]),
     ("Cases in " + county_name + ", " + state_name, [q4]),
@@ -127,7 +125,14 @@ def when_changing_state(attr, old, new):
   counties_in_states.sort()
   select_county.options = counties_in_states
 
-  state_name = state
+  state_name = select_state.value
+  county_name = select_county.value
+
+  set_legend1_1(legend1, county_name, state_name, q2, q3)
+  set_legend1_1(legend1_log, county_name, state_name, q2_log, q3_log)
+
+  set_legend2_1(legend2, county_name, state_name, s0, s1)
+  set_legend2_1(legend2_log, county_name, state_name, s0_log, s1_log)
 
   state = us_counties.groupby("state").get_group(state_name)
   res = state.groupby("county")
@@ -140,8 +145,8 @@ def when_changing_county(attr, old, new):
   state_name = select_state.value
   county_name = select_county.value
 
-  set_legend1_1(legend1, county_name, state_name, q0, q1, q2, q3)
-  set_legend1_1(legend1_log, county_name, state_name, q0_log, q1_log, q2_log, q3_log)
+  set_legend1_1(legend1, county_name, state_name, q2, q3)
+  set_legend1_1(legend1_log, county_name, state_name, q2_log, q3_log)
 
   set_legend2_1(legend2, county_name, state_name, s0, s1)
   set_legend2_1(legend2_log, county_name, state_name, s0_log, s1_log)
@@ -162,11 +167,9 @@ def set_legend2_1(legend, county_name, state_name, s0, s1):
   legend.items[1] = LegendItem(label="Deaths per Capita in " + county_name + ", " + state_name, renderers=[s1])
 
 
-def set_legend1_1(legend, county_name, state_name, q0, q1, q2, q3):
-  legend.items[0] = LegendItem(label="Cases in " + state_name, renderers=[q0])
-  legend.items[1] = LegendItem(label="Deaths in " + state_name, renderers=[q1])
-  legend.items[2] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q2])
-  legend.items[3] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q3])
+def set_legend1_1(legend, county_name, state_name, q2, q3):
+  legend.items[0] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q2])
+  legend.items[1] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q3])
 
 
 def when_changing_state_2(attr, old, new):
@@ -175,7 +178,14 @@ def when_changing_state_2(attr, old, new):
   counties_in_states.sort()
   select_county_2.options = counties_in_states
 
-  state_name = state
+  state_name = select_state_2.value
+  county_name = select_county_2.value
+
+  set_legend1_2(legend1, county_name, state_name, q4, q5)
+  set_legend1_2(legend1_log, county_name, state_name, q4_log, q5_log)
+
+  set_legend2_2(legend2, county_name, state_name, s2, s3)
+  set_legend2_2(legend2_log, county_name, state_name, s2_log, s3_log)
 
   state = us_counties.groupby("state").get_group(state_name)
   res = state.groupby("county")
@@ -210,8 +220,8 @@ def set_legend2_2(legend, county_name, state_name, s2, s3):
 
 
 def set_legend1_2(legend, county_name, state_name, q4, q5):
-  legend.items[4] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q4])
-  legend.items[5] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q5])
+  legend.items[2] = LegendItem(label="Cases in " + county_name + ", " + state_name, renderers=[q4])
+  legend.items[3] = LegendItem(label="Deaths in " + county_name + ", " + state_name, renderers=[q5])
 
 
 def get_county_dataset(state_name, county_name):
@@ -319,8 +329,8 @@ source = ColumnDataSource(get_county_dataset(first_state, first_county))
 source1 = ColumnDataSource(get_county_dataset(state_name, county_name))
 source2 = ColumnDataSource(get_county_dataset(first_state, " All Counties"))
 
-p1, q0, q1, q2, q3, q4, q5, q0_trend, q1_trend, title_p1 = gen_figure_1()
-p1_log, q0_log, q1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")
+p1, q2, q3, q4, q5, q0_trend, q1_trend, title_p1 = gen_figure_1()
+p1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")
 tab1_lin = Panel(child=p1, title="Linear")
 tab1_log = Panel(child=p1_log, title="Logarithmic")
 tabs_1 = Tabs(tabs=[tab1_lin, tab1_log])
@@ -340,10 +350,10 @@ p = gridplot([[title_p1],
               [title_p3],
               [p3]])
 
-legend1 = gen_legend_1(q0, q1, q2, q3, q4, q5, q0_trend, q1_trend)
+legend1 = gen_legend_1(q2, q3, q4, q5, q0_trend, q1_trend)
 legend2 = gen_legend_2(s0, s1, s2, s3)
 
-legend1_log = gen_legend_1(q0_log, q1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log)
+legend1_log = gen_legend_1(q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log)
 legend2_log = gen_legend_2(s0_log, s1_log, s2_log, s3_log)
 
 legend3, legend4 = gen_legend_3(t0, t1, t2, t3)
