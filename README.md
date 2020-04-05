@@ -72,6 +72,8 @@ New York Times and Census datasets.
 Currently there are 305/21,799 rows of data (as of 3/31/20) where the county does not match the census. The vast 
 majority of these cases are a result of the New York Times dataset listing the county as "Unknown".
 
+The census dataset was slightly modified to match the New York Times Dataset, such as combining all the counties of 
+New York City to match the New York Times Dataset.
 ### New York Times COVID-19 Dataset
 [NYT](https://github.com/nytimes/covid-19-data) 
 
