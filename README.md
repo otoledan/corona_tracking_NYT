@@ -32,6 +32,13 @@ Most of the packages in `requirements.txt` are already installed. The main two p
 To install `Pandas` follow these [instructions](https://pandas.pydata.org/docs/getting_started/install.html).
 To install `Bokeh` follow these [instructions](https://docs.bokeh.org/en/latest/docs/user_guide/quickstart.html#userguide-quickstart).
 
+### Load Balancing using Nginx (Optional)
+
+If you would like to load balance the server (ie have multiple servers running and have requests forwarded to different 
+servers), then install Nginx. 
+
+Follow these [instructions](https://www.nginx.com/resources/wiki/start/topics/tutorials/install/) on how to install Nginx.
+
 ## Launching Project
 
 ### If using a Virtual environment
@@ -40,7 +47,7 @@ Launch your virtual environment first, then follow the below instructions.
 python3 -m venv <myenvname> 
 ```
 
-### All Us Cases
+### All Use Cases
 This project uses a Bokeh Server to run the site with visualizations locally.
 
 To launch the Bokeh Server run `bokeh serve --show main.py`.
@@ -49,6 +56,21 @@ If you would like to change the default comparison county run  `bokeh serve --sh
 
 Data can be updated manually by running `python population_stats pull_data`. This is not needed since data will be 
 pulled by the Bokeh server every 6 hours.
+
+Access the server at `http://localhost:5006`
+
+### Load balancing (optional)
+Move the `nginx.conf` file to `/etc/nginx/nginx.conf`.
+
+Launch 4 servers with the following commands:
+```
+bokeh serve --show main.py --port 5000
+bokeh serve --show main.py --port 5001
+bokeh serve --show main.py --port 5002
+bokeh serve --show main.py --port 5003
+```
+
+Access the servers at `http://localhost:2001`
 
 ## Using Project
 

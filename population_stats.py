@@ -16,8 +16,8 @@ def get_data(access_saved=True):
   if access_saved and os.path.exists("full_data.csv"):
     merged = pd.read_csv("full_data.csv")
   else:
-    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
-    #urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv", "us-counties.csv")
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", "us-states.csv")
 
     time1 = time.clock()
 

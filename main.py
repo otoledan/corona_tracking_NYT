@@ -1,4 +1,7 @@
 from datetime import datetime
+from os import remove
+from os.path import isfile
+
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, Legend, LegendItem, Paragraph, Panel, Tabs
 from bokeh.layouts import gridplot
@@ -11,6 +14,7 @@ import time
 from functools import partial
 from threading import Thread
 import bokeh.server
+from bokeh.settings import settings
 
 
 def gen_figure_1(y_axis_type="linear"):
@@ -269,8 +273,12 @@ def blocking_task():
           + str(cur_time.second).zfill(2))
     '''
     if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute:
-      if bokeh.server.get_data == False:
+      if bokeh.server.get_data == False and not isfile("update.txt"):
         bokeh.server.get_data = True
+        bokeh.server.data_needs_loading = False
+
+        f = open("update.txt", "w+")
+        f.close()
 
         print("Downloading Data...")
         global us_counties
@@ -278,9 +286,24 @@ def blocking_task():
         us_counties = bokeh.server.data
         print("Downloaded")
 
+      elif bokeh.server.get_data == False and isfile("update.txt"):
+        bokeh.server.get_data = True
+        bokeh.server.data_needs_loading = True
+        print("Data Download Initiated on another Server")
+
+    if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 3 \
+            and bokeh.server.data_needs_loading and bokeh.server.get_data:
+      bokeh.server.data_needs_loading = False
+      print("Data Loading")
+      bokeh.server.data = get_data()
+      us_counties = bokeh.server.data
+
     if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 5:
       bokeh.server.get_data = False
-      print("Reset get_data Flag")
+      if isfile("update.txt"):
+        remove("update.txt")
+
+      print("Reset get_data and data_needs_loading flags")
       us_counties = bokeh.server.data
       doc.add_next_tick_callback(partial(update))
 
@@ -311,12 +334,17 @@ time_minute = 0
 state_name = "California"
 county_name = "Los Angeles"
 
+###############################################################
+
+settings.allowed_ws_origin = ["localhost:2001", "*.ngrok.io", "localhost:5006"]
+
 if len(sys.argv) == 3:
   state_name = sys.argv[1]
   county_name = sys.argv[2]
 
 if not hasattr(bokeh.server, "get_data"):
   bokeh.server.get_data = False
+  bokeh.server.data_needs_loading = False
   bokeh.server.data = get_data()
 
 us_counties = bokeh.server.data
