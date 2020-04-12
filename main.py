@@ -19,7 +19,7 @@ from bokeh.settings import settings
 
 def gen_figure_1(y_axis_type="linear"):
   title = gen_html_paragraph(text="Cases and Deaths", weight="bold")
-  p1 = figure(x_axis_type="datetime", plot_height=300, plot_width=800, y_axis_type=y_axis_type)
+  p1 = figure(x_axis_type="datetime", plot_height=500, sizing_mode="stretch_width", y_axis_type=y_axis_type)
   p1.xaxis.axis_label = 'Time'
   p1.yaxis.axis_label = 'People'
   r2 = p1.line('date', 'cases', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -38,7 +38,7 @@ def gen_figure_1(y_axis_type="linear"):
 
 def gen_figure_2(y_axis_type="linear"):
   title = gen_html_paragraph(text="Cases and Deaths per Capita", weight="bold")
-  p2 = figure(x_axis_type="datetime", plot_height=300, plot_width=800, y_axis_type=y_axis_type)
+  p2 = figure(x_axis_type="datetime", plot_height=500, sizing_mode="stretch_width", y_axis_type=y_axis_type)
   p2.xaxis.axis_label = 'Time'
   p2.yaxis.axis_label = 'Percent People'
   s0 = p2.line('date', 'cases_per_capita', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -56,7 +56,7 @@ def gen_figure_2(y_axis_type="linear"):
 def gen_figure_3():
   title = gen_html_paragraph(text="Cases and Deaths over Total Cases and Deaths in State", weight="bold")
   p3 = figure(x_axis_type="datetime",
-              plot_height=300 + 120, plot_width=800)
+              plot_height=500, sizing_mode="stretch_width")
   p3.xaxis.axis_label = 'Time'
   p3.yaxis.axis_label = 'Percent People'
   t0 = p3.line('date', 'cases_per_state', source=source, line_width=line_width, muted_alpha=muted_alpha)
@@ -101,13 +101,13 @@ def gen_legend_3(t0, t1, t2, t3):
   legend3 = Legend(items=[
     (first_county + " Cases/" + first_state + " Cases", [t0]),
     (first_county + " Deaths/" + first_state + " Deaths", [t1]),
-  ], location=(0, 20), orientation="horizontal")
+  ], location=(0, 20))
   legend3.click_policy = click_policy
 
   legend4 = Legend(items=[
     (county_name + " Cases/" + state_name + " Cases", [t2]),
     (county_name + " Deaths/" + state_name + " Deaths", [t3]),
-  ], location=(0, 40), orientation="horizontal")
+  ], location=(0, 40))
   legend4.click_policy = click_policy
 
   return legend3, legend4
@@ -316,7 +316,7 @@ def blocking_task():
 
 
 def gen_html_paragraph(text, width=800, font_size=13.333, weight="normal"):
-  return Paragraph(text=text, width=width, style={"font-size": str(font_size) + "px", "font-weight": weight})
+  return Paragraph(text=text, width=None, style={"font-size": str(font_size) + "px", "font-weight": weight}, sizing_mode="stretch_width")
 
 ###############################################################
 
@@ -336,7 +336,7 @@ county_name = "Los Angeles"
 
 ###############################################################
 
-settings.allowed_ws_origin = ["localhost:2001", "*.ngrok.io", "localhost:5006"]
+settings.allowed_ws_origin = ["https://www.covidtracking.tk", "www.covidtracking.tk", "covidtracking.tk", "localhost:2001", "localhost:5006"]
 
 if len(sys.argv) == 3:
   state_name = sys.argv[1]
@@ -365,13 +365,13 @@ p1, q2, q3, q4, q5, q0_trend, q1_trend, title_p1 = gen_figure_1()
 p1_log, q2_log, q3_log, q4_log, q5_log, q0_trend_log, q1_trend_log, title_p1_log = gen_figure_1("log")
 tab1_lin = Panel(child=p1, title="Linear")
 tab1_log = Panel(child=p1_log, title="Logarithmic")
-tabs_1 = Tabs(tabs=[tab1_lin, tab1_log])
+tabs_1 = Tabs(tabs=[tab1_lin, tab1_log], sizing_mode="stretch_width")
 
 p2, s0, s1, s2, s3, s0_trend, s1_trend, title_p2 = gen_figure_2()
 p2_log, s0_log, s1_log, s2_log, s3_log, s0_trend_log, s1_trend_log, title_p2_log = gen_figure_2("log")
 tab2_lin = Panel(child=p2, title="Linear")
 tab2_log = Panel(child=p2_log, title="Logarithmic")
-tabs_2 = Tabs(tabs=[tab2_lin, tab2_log])
+tabs_2 = Tabs(tabs=[tab2_lin, tab2_log], sizing_mode="stretch_width")
 
 p3, t0, t1, t2, t3, title_p3 = gen_figure_3()
 
@@ -380,7 +380,7 @@ p = gridplot([[title_p1],
               [title_p2],
               [tabs_2],
               [title_p3],
-              [p3]])
+              [p3]], sizing_mode="stretch_width")
 
 legend1 = gen_legend_1(q2, q3, q4, q5, q0_trend, q1_trend)
 legend2 = gen_legend_2(s0, s1, s2, s3, s0_trend, s1_trend)
@@ -390,11 +390,11 @@ legend2_log = gen_legend_2(s0_log, s1_log, s2_log, s3_log, s0_trend_log, s1_tren
 
 legend3, legend4 = gen_legend_3(t0, t1, t2, t3)
 
-p1.add_layout(legend1)
-p1_log.add_layout(legend1_log)
+p1.add_layout(legend1, "below")
+p1_log.add_layout(legend1_log, "below")
 
-p2.add_layout(legend2)
-p2_log.add_layout(legend2_log)
+p2.add_layout(legend2, "below")
+p2_log.add_layout(legend2_log, "below")
 
 p3.add_layout(legend3, "below")
 p3.add_layout(legend4, "below")
@@ -413,13 +413,23 @@ select_state_2, select_county_2 = gen_select_state_county(state_name, county_nam
 select_state_2.on_change('value', when_changing_state_2)
 select_county_2.on_change('value', when_changing_county_2)
 
+one = bokeh.layouts.layout([
+  [text_col_select],
+  [select_state],
+  [select_county]
+], sizing_mode="stretch_width")
+
+two = bokeh.layouts.layout([
+  [text_col_select_2],
+  [select_state_2],
+  [select_county_2]
+], sizing_mode="stretch_width")
+
 selection_grid = bokeh.layouts.layout([
     [title],
     [subtitle],
-    [text_col_select, text_col_select_2],
-    [select_state, select_state_2],
-    [select_county, select_county_2]
-])
+    [one, two]
+], sizing_mode="stretch_width")
 
 doc = curdoc()
 doc.title = "COVID-19 Charts"
