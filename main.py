@@ -265,40 +265,29 @@ def update():
 
 def blocking_task():
   while True:
+    global us_counties
     # do some blocking computation
     cur_time = datetime.now()
+
+    last_updated_file = os.path.getmtime("full_data.csv")
+    epoch = datetime.utcfromtimestamp(0)
+    total_seconds = (cur_time - epoch).total_seconds()
 
     '''
     print("Current Time:", str(cur_time.hour) + ":" + str(cur_time.minute).zfill(2) + ":"
           + str(cur_time.second).zfill(2))
     '''
     if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute:
-      if bokeh.server.get_data == False and not isfile("update.txt"):
-        bokeh.server.get_data = True
-        bokeh.server.data_needs_loading = False
+      data_download()
 
-        f = open("update.txt", "w+")
-        f.close()
-
-        print("Downloading Data...")
-        global us_counties
-        bokeh.server.data = get_data(False)
-        us_counties = bokeh.server.data
-        print("Downloaded")
-
-      elif bokeh.server.get_data == False and isfile("update.txt"):
-        bokeh.server.get_data = True
-        bokeh.server.data_needs_loading = True
-        print("Data Download Initiated on another Server")
-
-    if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 3 \
+    elif cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 3 \
             and bokeh.server.data_needs_loading and bokeh.server.get_data:
       bokeh.server.data_needs_loading = False
       print("Data Loading")
       bokeh.server.data = get_data()
       us_counties = bokeh.server.data
 
-    if cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 5:
+    elif cur_time.hour % time_every == time_hour and cur_time.minute == time_minute + 5:
       bokeh.server.get_data = False
       if isfile("update.txt"):
         remove("update.txt")
@@ -307,13 +296,30 @@ def blocking_task():
       us_counties = bokeh.server.data
       doc.add_next_tick_callback(partial(update))
 
-    '''
-    else:
-      print("Data will be updated at:", str((int(cur_time.hour / time_every) * time_every + time_every) % 24)
-            + ":" + str(time_minute + 5).zfill(2) + ":00")
-    '''
+    elif (total_seconds - last_updated_file) > (time_every * 60 * 60):
+      data_download()
+
     time.sleep(60)
 
+
+def data_download():
+  if bokeh.server.get_data == False and not isfile("update.txt"):
+    bokeh.server.get_data = True
+    bokeh.server.data_needs_loading = False
+
+    f = open("update.txt", "w+")
+    f.close()
+
+    print("Downloading Data...")
+    global us_counties
+    bokeh.server.data = get_data(False)
+    us_counties = bokeh.server.data
+    print("Downloaded")
+
+  elif bokeh.server.get_data == False and isfile("update.txt"):
+    bokeh.server.get_data = True
+    bokeh.server.data_needs_loading = True
+    print("Data Download Initiated on another Server")
 
 def gen_html_paragraph(text, width=800, font_size=13.333, weight="normal"):
   return Paragraph(text=text, width=None, style={"font-size": str(font_size) + "px", "font-weight": weight}, sizing_mode="stretch_width")
